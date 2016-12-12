@@ -66,7 +66,7 @@ export default class Bungo {
   }
 
   /**
-   * Request access.
+   * Request accessToken.
    *
    * @param {Function} fn Completion callback
    * @public
@@ -91,9 +91,54 @@ export default class Bungo {
    * @public
    */
   token(fn) {
-    if (this.refreshToken) return this.refresh(fn);
+    //
+    // 1:
+    //
+    // Look if we have a stored accessToken and check if it's still somewhat
+    // valid.
+    //
+    if (!this.expired(this.accessToken)) {
+      return fn(undefined, this.payload());
+    }
 
+    //
+    // 2:
+    //
+    // If we still have a refresh token, use it to generate a new access token.
+    //
+    if (!this.expired(this.refreshToken)) {
+      return this.refresh(fn);
+    }
+
+    //
+    // 3:
+    //
+    // Abandon all hope, ask for another sign in as we have no token, no refresh
+    // token, no nothing. The world is a sad place, and addition user actions
+    // have to be taken.
+    //
     this.request(fn);
+  }
+
+  /**
+   * Check if our given token is alive and kicking or if it's expired.
+   *
+   * @param {Object} token Token object received from Bungie.net
+   * @returns {Boolean}
+   * @private
+   */
+  expired(token) {
+    if (typeof token !== 'object' || !token.value || !token.epoch) return true;
+
+    //
+    // We transform the difference in epoch to seconds and remove a small amount
+    // of buffering so people actually have some time to do an API request with
+    // the returned token.
+    //
+    const now = Date.now();
+    const diff = Math.ceil((now - token.epoch) / 1000) + this.config.buffer;
+
+    return token.expires < diff;
   }
 
   /**
@@ -173,15 +218,50 @@ export default class Bungo {
         }));
       }
 
+      const refreshToken = this.refreshToken;
       const data = body.Response;
+      const now = Date.now();
+
+      //
+      // The API responses only have a `expires` and  `readyin` values which
+      // started when the API request was made. So if you store these values you
+      // really have no clue if you can still use the accessToken or
+      // refreshToken.
+      //
+      data.refreshToken.epoch = now
+      data.accessToken.epoch = now;
 
       this.refreshToken = data.refreshToken;
       this.accessToken = data.accessToken;
 
-      fn(undefined, {
-        refreshToken: this.refreshToken,
-        accessToken: this.accessToken
-      });
+      //
+      // Try to keep the internally cached accessToken as fresh as possible so
+      // our `.token` method is as fast as it can be. We want to make sure that
+      // we give our API some extra time to do the lookup so we'll subtract 60
+      // seconds from the expiree.
+      //
+      if (this.config.fresh) {
+        this.timers.clear('refresh');
+
+        this.timers.setTimeout('refresh', () => {
+          this.refresh(this.config.fresh);
+        }, (this.accessToken.expires - this.config.buffer) + ' seconds');
+      }
+
+      fn(undefined, this.payload());
+    };
+  }
+
+  /**
+   * The payload that is returned to the user.
+   *
+   * @returns {Object} The API payload.
+   * @public
+   */
+  payload() {
+    return {
+      refreshToken: this.refreshToken,
+      accessToken: this.accessToken
     };
   }
 }
@@ -201,5 +281,6 @@ Bungo.defaults = {
     'always-on-top': true,
     'center': true
   },
-  autorefresh: true
+  buffer: 60,
+  fresh: false
 };
