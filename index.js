@@ -128,7 +128,9 @@ export default class Bungo {
    * @private
    */
   expired(token) {
-    if (typeof token !== 'object' || !token.value || !token.epoch) return true;
+    if (typeof token !== 'object' || !token.value || !token.epoch || !token.expires) {
+      return true;
+    }
 
     //
     // We transform the difference in epoch to seconds and remove a small amount
