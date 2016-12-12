@@ -4,7 +4,7 @@
   "description": "Authentication library for Bungie.net",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --compilers js:babel-register test.js"
   },
   "repository": {
     "type": "git",
@@ -31,5 +31,11 @@
     "tick-tock": "1.0.0",
     "url-parse": "1.1.7",
     "uuid": "3.0.1"
+  },
+  "devDependencies": {
+    "assume": "1.4.1",
+    "babel-register": "6.18.0",
+    "mocha": "3.2.0",
+    "nock": "9.0.2"
   }
 }
