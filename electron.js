@@ -1,4 +1,5 @@
 import { BrowserWindow } from 'electron';
+import failure from 'failure';
 import URL from 'url-parse';
 import Bungo from './';
 
@@ -14,6 +15,7 @@ export default class Electron extends Bungo {
 
     this.active = false;
   }
+
   /**
    * Open a new browser window for the oAuth authorization flow.
    *
@@ -21,7 +23,7 @@ export default class Electron extends Bungo {
    * @private
    */
   open(fn) {
-    if (this.active) return fn(new Error('Already have an oAuth window open.'));
+    if (this.active) return fn(failure('Already have an oAuth window open.'));
 
     const browser = this.active = new BrowserWindow(
       Object.assign(this.config.browser, {
@@ -56,7 +58,7 @@ export default class Electron extends Bungo {
     };
 
     browser.on('closed', () => {
-      close(new Error('User closed the oAuth window'));
+      close(failure('User closed the oAuth window'));
     });
 
     browser.loadURL(this.url());
