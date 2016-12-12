@@ -1,0 +1,35 @@
+{
+  "name": "bungie-auth",
+  "version": "1.0.0",
+  "description": "Authentication library for Bungie.net",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/destinythegame/bungie-auth.git"
+  },
+  "keywords": [
+    "Bungie",
+    "Destiny",
+    "DestinyTheGame",
+    "Auth",
+    "OAuth2.0",
+    "Electron",
+    "Atom"
+  ],
+  "author": "Arnout Kazemier",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/destinythegame/bungie-auth/issues"
+  },
+  "homepage": "https://github.com/destinythegame/bungie-auth#readme",
+  "dependencies": {
+    "failure": "1.1.1",
+    "request": "2.79.0",
+    "tick-tock": "1.0.0",
+    "url-parse": "1.1.7",
+    "uuid": "3.0.1"
+  }
+}

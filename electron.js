@@ -1,0 +1,84 @@
+import { BrowserWindow } from 'electron';
+import URL from 'url-parse';
+import Bungo from './';
+
+/**
+ * Implementation of the oAuth handling using electron.
+ *
+ * @constructor
+ * @public
+ */
+export default class Electron extends Bungo {
+  constructor() {
+    super(...arguments);
+
+    this.active = false;
+  }
+  /**
+   * Open a new browser window for the oAuth authorization flow.
+   *
+   * @param {Function} fn Completion callback.
+   * @private
+   */
+  open(fn) {
+    if (this.active) return fn(new Error('Already have an oAuth window open.'));
+
+    const browser = this.active = new BrowserWindow(
+      Object.assign(this.config.browser, {
+        //
+        // This should never be overridden. If we spawn the window without this
+        // option we will end up with a page full of JavaScript errors and we
+        // really want to create a normal functioning browser window. No special
+        // sauce needed
+        //
+        webPreferences: {
+          nodeIntegration: false
+        }
+      })
+    );
+
+    /**
+     * Clean up our authorization windows and call our callback.
+     *
+     * @param {Error} err Optional error callback.
+     * @param {String} url Received URL.
+     * @private
+     */
+    const close = (err, url) => {
+      this.active = false;
+      browser.removeAllListeners('closed');
+
+      setImmediate(() => {
+        browser.destroy();
+      });
+
+      fn(err, url);
+    };
+
+    browser.on('closed', () => {
+      close(new Error('User closed the oAuth window'));
+    });
+
+    browser.loadURL(this.url());
+    browser.show();
+
+    browser.webContents.on('did-get-redirect-request', (event, prev, next) => {
+      const target = new URL(next);
+
+      //
+      // This part of Bungie's o-auth flow is weird as fuck, normally you would
+      // just login with your credentials and be done, but they need to get your
+      // playstation details so they are not really an oAuth provider but more
+      // like an oAuth proxy so they will redirect a couple of times during the
+      // oAuth flow.
+      //
+      if (target.hostname === 'www.bungie.net') return;
+
+      if (!this.secure(next)) {
+        return close(new Error('Possible security attack detected'));
+      }
+
+      close(undefined, next);
+    });
+  }
+}
