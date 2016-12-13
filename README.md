@@ -354,7 +354,7 @@ spawn windows and do POST calls to the Bungie API for access tokens.
 
 The following properties are specific to `electron`
 
-- `browser` Allows you to control options for the created `BrowserWindow` by
+- `electron` Allows you to control options for the created `BrowserWindow` by
   default we will spawn a window that the same size as oAuth window.
 
 While we allow you to configure the `browser` option, we forcefully apply

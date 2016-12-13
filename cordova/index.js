@@ -1,18 +1,19 @@
-import { BrowserWindow } from 'electron';
 import failure from 'failure';
+import once from 'one-time';
 import URL from 'url-parse';
-import Bungo from './';
+import Bungo from '../';
 
 /**
- * Implementation of the oAuth handling using electron.
+ * Implementation of the oAuth handling using cordova.
  *
  * @constructor
  * @public
  */
-export default class Electron extends Bungo {
+export default class Cordova extends Bungo {
   constructor() {
     super(...arguments);
 
+    this.config = Object.assign({}, Cordova.defaults, this.config);
     this.active = false;
   }
 
@@ -25,18 +26,10 @@ export default class Electron extends Bungo {
   open(fn) {
     if (this.active) return fn(failure('Already have an oAuth window open.'));
 
-    const browser = this.active = new BrowserWindow(
-      Object.assign(this.config.browser, {
-        //
-        // This should never be overridden. If we spawn the window without this
-        // option we will end up with a page full of JavaScript errors and we
-        // really want to create a normal functioning browser window. No special
-        // sauce needed
-        //
-        webPreferences: {
-          nodeIntegration: false
-        }
-      })
+    const browser = cordova.InAppBrowser.open(
+      this.url(),
+      this.config.cordova.target,
+      this.config.cordova.options
     );
 
     /**
@@ -46,25 +39,18 @@ export default class Electron extends Bungo {
      * @param {String} url Received URL.
      * @private
      */
-    const close = (err, url) => {
+    const close = once((err, url) => {
       this.active = false;
-      browser.removeAllListeners('closed');
 
       setImmediate(() => {
-        browser.destroy();
+        browser.close();
       });
 
       fn(err, url);
-    };
-
-    browser.on('closed', () => {
-      close(failure('User closed the oAuth window'));
     });
 
-    browser.loadURL(this.url());
-    browser.show();
-
-    browser.webContents.on('did-get-redirect-request', (event, prev, next) => {
+    browser.addEventListener('loadstart', (e) => {
+      const next = e.originalEvent.url;
       const target = new URL(next);
 
       //
@@ -78,5 +64,26 @@ export default class Electron extends Bungo {
 
       close(undefined, next);
     });
+
+    browser.addEventListener('loaderror', (e) => {
+      close(failure('Failed to load oAuth page: '+ e.message));
+    });
+
+    browser.addEventListener('exit', (e) => {
+      close(failure('User closed the oAuth window'));
+    });
   }
 }
+
+/**
+ * Default options.
+ *
+ * @type {Object}
+ * @private
+ */
+Cordova.defaults = {
+  cordova: {
+    target: '_blank'
+    options: ''
+  }
+};

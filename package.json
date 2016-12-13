@@ -27,6 +27,7 @@
   "homepage": "https://github.com/destinythegame/bungie-auth#readme",
   "dependencies": {
     "failure": "1.1.1",
+    "one-time": "0.0.4",
     "request": "2.79.0",
     "tick-tock": "1.0.0",
     "url-parse": "1.1.7",

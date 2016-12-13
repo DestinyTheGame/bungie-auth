@@ -285,13 +285,6 @@ export default class Bungo {
  */
 Bungo.defaults = {
   url: 'https://www.bungie.net/en/Application/Authorize/',
-  browser: {
-    'auto-hide-menu-bar': true,
-    'use-content-size': true,
-    'standard-window': true,
-    'always-on-top': true,
-    'center': true
-  },
   buffer: 60,
   fresh: false
 };
