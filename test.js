@@ -20,6 +20,7 @@ describe('Bungie', function () {
 
   describe('#expired', function () {
     it('returns true if its no object or has no value or no epoch', function () {
+      assume(bungo.expired(null)).is.true();
       assume(bungo.expired(true)).is.true();
       assume(bungo.expired({})).is.true();
       assume(bungo.expired('string')).is.true();
