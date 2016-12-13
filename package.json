@@ -1,6 +1,6 @@
 {
   "name": "bungie-auth",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Authentication library for Bungie.net",
   "main": "index.js",
   "scripts": {
