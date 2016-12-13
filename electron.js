@@ -76,10 +76,6 @@ export default class Electron extends Bungo {
       //
       if (target.hostname === 'www.bungie.net') return;
 
-      if (!this.secure(next)) {
-        return close(new Error('Possible security attack detected'));
-      }
-
       close(undefined, next);
     });
   }

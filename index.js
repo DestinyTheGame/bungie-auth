@@ -75,10 +75,19 @@ export default class Bungo {
     this.open((err, url) => {
       if (err) return fn(err);
 
+      //
+      // Validate that our `state` value is exactly the same as the one supplied
+      // in the URL. This is to validate that the response was not altered by a
+      // man in the middle.
+      //
+      if (!this.secure(url)) {
+        return fn(new Error('Possible security attack detected'));
+      }
+
       const target = new URL(url, true);
 
       this.send('GetAccessTokensFromCode', {
-        code: '4080809'
+        code: target.query.code
       }, this.capture(fn));
     });
   }
@@ -128,7 +137,7 @@ export default class Bungo {
    * @private
    */
   expired(token) {
-    if (typeof token !== 'object' || !token.value || !token.epoch || !token.expires) {
+    if (!token || typeof token !== 'object' || !token.value || !token.epoch || !token.expires) {
       return true;
     }
 
