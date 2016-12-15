@@ -91,10 +91,9 @@ export default class Electron extends Bungo {
  */
 Electron.defaults = {
   electron: {
-    'auto-hide-menu-bar': true,
-    'use-content-size': true,
-    'standard-window': true,
-    'always-on-top': true,
-    'center': true
+    autoHideMenuBar: true,
+    useContentSize: true,
+    alwaysOnTop: true,
+    center: true
   }
 };
