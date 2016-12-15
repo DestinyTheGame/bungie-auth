@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.0.3
+
+- Opt-in to `babel-register` compilation by setting `babel-ignore` to `false` in
+  the `package.json`
+
 ### 0.0.2
 
 - Use the correct window options for electron so that auth window actually
