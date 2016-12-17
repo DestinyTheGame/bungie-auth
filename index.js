@@ -245,6 +245,8 @@ export default class Bungo {
       this.refreshToken = data.refreshToken;
       this.accessToken = data.accessToken;
 
+      const payload = this.payload();
+
       //
       // Try to keep the internally cached accessToken as fresh as possible so
       // our `.token` method is as fast as it can be. We want to make sure that
@@ -254,12 +256,22 @@ export default class Bungo {
       if (this.config.fresh) {
         this.timers.clear('refresh');
 
+        //
+        // Check if we previously already had data or if this is actually the
+        // first time we received data because in that case we also want to
+        // trigger the fresh function so it can be used as storage callback for
+        // applications
+        //
+        if (!refreshToken) {
+          this.config.fresh(err, payload);
+        }
+
         this.timers.setTimeout('refresh', () => {
           this.refresh(this.config.fresh);
         }, (this.accessToken.expires - this.config.buffer) + ' seconds');
       }
 
-      fn(undefined, this.payload());
+      fn(err, payload);
     };
   }
 
