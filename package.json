@@ -26,20 +26,20 @@
   },
   "homepage": "https://github.com/destinythegame/bungie-auth#readme",
   "dependencies": {
-    "babel-preset-es2015": "6.18.0",
-    "babel-preset-react": "6.16.0",
-    "failure": "1.1.1",
-    "one-time": "0.0.4",
-    "request": "2.79.0",
-    "tick-tock": "1.0.0",
-    "url-parse": "1.1.7",
-    "uuid": "3.0.1"
+    "babel-preset-es2015": "6.18.x",
+    "babel-preset-react": "6.16.x",
+    "failure": "1.1.x",
+    "one-time": "0.0.x",
+    "request": "2.79.x",
+    "tick-tock": "1.0.x",
+    "url-parse": "1.1.x",
+    "uuid": "3.0.x"
   },
   "devDependencies": {
-    "assume": "1.4.1",
-    "babel-register": "6.18.0",
-    "mocha": "3.2.0",
-    "nock": "9.0.2"
+    "assume": "1.4.x",
+    "babel-register": "6.18.x",
+    "mocha": "3.2.x",
+    "nock": "9.0.x"
   },
   "babel-ignore": false,
   "babel": {
