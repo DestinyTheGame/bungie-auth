@@ -1,5 +1,10 @@
 # CHANGELOG
 
+### 0.0.4
+
+- Call the `fresh` option also when we first receive our tokens so we can
+  actually store that shit.
+
 ### 0.0.3
 
 - Opt-in to `babel-register` compilation by setting `babel-ignore` to `false` in
