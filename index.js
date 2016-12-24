@@ -168,7 +168,7 @@ export default class Bungo {
     const diff = Math.ceil((now - token.epoch) / 1000) + this.config.buffer;
     const canbeused = token.expires < diff;
 
-    debug('token diff %j, expired: ', diff, canbeused)
+    debug('token diff %j/%js, expired: ', diff, token.expires, canbeused);
     return canbeused;
   }
 
