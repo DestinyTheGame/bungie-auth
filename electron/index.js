@@ -1,8 +1,14 @@
 import { BrowserWindow } from 'electron';
+import diagnostics from 'diagnostics';
 import failure from 'failure';
 import once from 'one-time';
 import URL from 'url-parse';
 import Bungo from '../';
+
+//
+// Setup our debug utility.
+//
+const debug = diagnostics('bungie-auth:electron');
 
 /**
  * Implementation of the oAuth handling using electron.
@@ -25,7 +31,10 @@ export default class Electron extends Bungo {
    * @private
    */
   open(fn) {
-    if (this.active) return fn(failure('Already have an oAuth window open.'));
+    if (this.active) {
+      debug('we already have an oauth window open, raising error');
+      return fn(failure('Already have an oAuth window open.'));
+    }
 
     const browser = this.active = new BrowserWindow(
       Object.assign({}, this.config.electron, {
@@ -60,6 +69,7 @@ export default class Electron extends Bungo {
     });
 
     browser.on('closed', () => {
+      debug('user closed browser window');
       close(failure('User closed the oAuth window'));
     });
 
@@ -68,6 +78,7 @@ export default class Electron extends Bungo {
 
     browser.webContents.on('did-get-redirect-request', (event, prev, next) => {
       const target = new URL(next);
+      debug('received redirect request to %s', next);
 
       //
       // This part of Bungie's o-auth flow is weird as fuck, normally you would

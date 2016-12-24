@@ -1,8 +1,15 @@
+import diagnostics from 'diagnostics';
 import TickTock from 'tick-tock';
 import failure from 'failure';
 import request from 'request';
 import URL from 'url-parse';
 import uuid from 'uuid/v4';
+
+//
+// Setup our debug utility so we can figure out what is going on in with the
+// module internals.
+//
+const debug = diagnostics('bungie-auth');
 
 /**
  * Access oAuth from Bungie.net
@@ -48,6 +55,7 @@ export default class Bungo {
     this.state = uuid();
     target.set('query', { state: this.state });
 
+    debug('created a oauth URL %s', target.href);
     return target.href;
   }
 
@@ -81,6 +89,7 @@ export default class Bungo {
       // man in the middle.
       //
       if (!this.secure(url)) {
+        debug('the given url is not secure, possible security leak detected: %s', url);
         return fn(new Error('Possible security attack detected'));
       }
 
@@ -107,6 +116,7 @@ export default class Bungo {
     // valid.
     //
     if (!this.expired(this.accessToken)) {
+      debug('accessToken is not yet expired, using cached access token');
       return fn(undefined, this.payload());
     }
 
@@ -116,6 +126,7 @@ export default class Bungo {
     // If we still have a refresh token, use it to generate a new access token.
     //
     if (!this.expired(this.refreshToken)) {
+      debug('refreshToken is not yet expired, using cached refresh token');
       return this.refresh(fn);
     }
 
@@ -126,6 +137,7 @@ export default class Bungo {
     // token, no nothing. The world is a sad place, and addition user actions
     // have to be taken.
     //
+    debug('no working access and refresh tokens found, starting oauth flow');
     this.request(fn);
   }
 
@@ -138,6 +150,7 @@ export default class Bungo {
    */
   expired(token) {
     if (!token || typeof token !== 'object' || !token.value || !token.epoch || !token.expires) {
+      debug('no valid token received assume its expired');
       return true;
     }
 
@@ -148,8 +161,10 @@ export default class Bungo {
     //
     const now = Date.now();
     const diff = Math.ceil((now - token.epoch) / 1000) + this.config.buffer;
+    const canbeused = token.expires < diff;
 
-    return token.expires < diff;
+    debug('token diff %n, expired: ', diff, canbeused)
+    return canbeused;
   }
 
   /**
@@ -161,11 +176,14 @@ export default class Bungo {
    * @public
    */
   send(pathname, body, fn) {
+    const url = 'https://www.bungie.net/Platform/App/'+ pathname +'/';
+    debug('sending API request to %s', url);
+
     request({
+      url: url,
       json: true,
       method: 'POST',
       body: JSON.stringify(body),
-      url: 'https://www.bungie.net/Platform/App/'+ pathname +'/',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-API-Key': this.config.key,
@@ -204,7 +222,7 @@ export default class Bungo {
     }
 
     return this.send('GetAccessTokensFromRefreshToken', {
-      refreshToken: token
+      refreshToken: token.value
     }, this.capture(fn));
   }
 
@@ -218,15 +236,19 @@ export default class Bungo {
    */
   capture(fn) {
     return (err, body = {}) => {
-      if (err) return fn(err);
+      if (err) {
+        debug('Bungie API request failed hard: %s', err.message);
+        return fn(err);
+      }
 
       //
       // Handle various of failures.
       //
       if (!('Response' in body) || 'Success' !== body.ErrorStatus) {
-        return fn(failure(body.Message || 'Invalid data received from Bungie.net', {
-          status: body.ErrorStatus
-        }));
+        const message = body.Message || 'Invalid data received from Bungie.net';
+
+        debug('Invalid response received from Bungie servers: %s', message);
+        return fn(failure(message, { status: body.ErrorStatus }));
       }
 
       const refreshToken = this.refreshToken;
@@ -263,10 +285,12 @@ export default class Bungo {
         // applications
         //
         if (!refreshToken) {
+          debug('first time calling refresh as we didnt have a token before')
           this.config.fresh(err, payload);
         }
 
         this.timers.setTimeout('refresh', () => {
+          debug('our refreshToken is about to expire, initating auto-refresh');
           this.refresh(this.config.fresh);
         }, (this.accessToken.expires - this.config.buffer) + ' seconds');
       }
