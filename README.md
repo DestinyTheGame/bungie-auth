@@ -229,7 +229,7 @@ bungie.expired(bungie.accessToken) // false
 
 ### capture
 
-**private api**
+*private api*
 
 Intercept and capture all API responses from Bungie so we can store the values
 internally.
@@ -248,7 +248,7 @@ bungie.send('GetAccessTokenFromRefreshToken', { refreshToken: token } fn);
 
 ### open
 
-**private api**
+*private api*
 
 This is a method that should be implemented by our [pre-build](#pre-build)
 integrations. This method should start the oAuth 2.0 Authorization flow using
@@ -275,7 +275,7 @@ bungie.open = function open(fn) {
 
 ### url
 
-**private api**
+*private api*
 
 Generate the URL that needs to be used for the oAuth 2.0 authorization flow.
 This automatically generates and stores a unique value as `this.state` which
@@ -290,7 +290,7 @@ const url = bungie.url();
 
 ### secure
 
-**private api**
+*private api*
 
 Checks the received URL to see if the received `state` query string matches our
 internal stored `state` so we can check if the request/response was tampered
@@ -310,7 +310,7 @@ bungie.secure('http//example.com/oauth/redirect?state=foo&code=bar'); // true
 
 ### send
 
-**private api**
+*private api*
 
 Our internal HTTP request method that does the API calls to the Bungie servers
 to validate/request the tokens and codes we receive from the Authorization flow.
@@ -333,7 +333,7 @@ bungie.send('GetAccessTokenFromRefreshToken', {
 
 ### setTimeout
 
-**private api**
+*private api*
 
 Start the internal setTimeout so we can automatically refresh the cached
 `accessToken` using the `refreshToken` so our internally cached token is alway
