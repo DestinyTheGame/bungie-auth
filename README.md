@@ -7,19 +7,19 @@ oAuth 2.0 based authentication process.
 
 - [Installation](#installation)
 - [Usage](#usage)
-  - [API](#api)
-    - [token](#token)
-    - [request](#request)
-    - [refresh](#refresh)
-    - [payload](#payload)
-    - [alive](#alive)
-    - [expired](#expired)
-    - [capture](#capture)
-    - [open](#open)
-    - [url](#url)
-    - [secure](#secure)
-    - [send](#send)
-    - [setTimeout](#settimeout)
+- [API](#api)
+  - [token](#token)
+  - [request](#request)
+  - [refresh](#refresh)
+  - [payload](#payload)
+  - [alive](#alive)
+  - [expired](#expired)
+  - [capture](#capture)
+  - [open](#open)
+  - [url](#url)
+  - [secure](#secure)
+  - [send](#send)
+  - [setTimeout](#settimeout)
 - [pre-build](#pre-build)
   - [electron](#electron)
 - [license](#license)
@@ -60,7 +60,7 @@ configuration values are optional:
   the cached internal `accessToken` when it's about to expire. The `fresh`
   method will be called with the new [payload](#payload).
 
-#### API
+## API
 
 ```js
 import Bungo from 'bungie-auth/electron';
@@ -99,7 +99,7 @@ bungie.token(function (err, paylaod) {
 });
 ```
 
-#### token
+### token
 
 Retrieve the access token from the API. If we have a cached `accessToken` which
 is still good, we will use that. If it's expired we will generate a new one with
@@ -117,7 +117,7 @@ bungie.token(function (err, payload) {
 });
 ```
 
-#### request
+### request
 
 Request a new access token. This will ask the user to login with their
 credentials and does the initial call the Bungie servers to retrieve the
@@ -134,7 +134,7 @@ bungie.request(function (err, payload) {
 });
 ```
 
-#### refresh
+### refresh
 
 Refresh the `accessToken` as it expires after like 30 minutes once you first
 requested it (see expires value in seconds on the `accessToken object`).
@@ -157,7 +157,7 @@ bungie.refresh(function (err, payload) {
 });
 ```
 
-#### payload
+### payload
 
 Formats and returns the payload that we received from the Bungie servers. API
 methods like [refresh](#refresh), [token](#token), [request](#request) use the
@@ -191,7 +191,7 @@ seconds. We add our own `epoch` property to each object. This is the result of
 `Date.now()` when we first received the information from the Bungie servers.
 This allows you to determine if the token is still valid or if it's expired.
 
-#### alive
+### alive
 
 Check how long a given token has been alive. Returns time in seconds so it can
 be matched against the `token.expires` property.
@@ -205,7 +205,7 @@ The method accepts a single argument:
 bungie.alive(bungie.accessToken) // 189
 ```
 
-#### expired
+### expired
 
 Check if a token is expired. It does this by checking the amount of seconds that
 have been passed since the token was received based on the `epoch` value that we
@@ -227,7 +227,7 @@ to be re-requested.
 bungie.expired(bungie.accessToken) // false
 ```
 
-#### capture
+### capture
 
 **private api**
 
@@ -246,7 +246,7 @@ const fn = bungie.capture(callback);
 bungie.send('GetAccessTokenFromRefreshToken', { refreshToken: token } fn);
 ```
 
-#### open
+### open
 
 **private api**
 
@@ -273,7 +273,7 @@ bungie.open = function open(fn) {
 };
 ```
 
-#### url
+### url
 
 **private api**
 
@@ -288,7 +288,7 @@ the authentication process.
 const url = bungie.url();
 ```
 
-#### secure
+### secure
 
 **private api**
 
@@ -308,7 +308,7 @@ bungie.state = 'foo';
 bungie.secure('http//example.com/oauth/redirect?state=foo&code=bar'); // true
 ```
 
-#### send
+### send
 
 **private api**
 
@@ -331,7 +331,7 @@ bungie.send('GetAccessTokenFromRefreshToken', {
 });
 ```
 
-#### setTimeout
+### setTimeout
 
 **private api**
 
