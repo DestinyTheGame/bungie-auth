@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.0.7
+
+- Clean up the debug information output with more information about the expiree.
+
 ### 0.0.6
 
 - Added error callback for when user denies/declines the oauth.
