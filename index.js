@@ -165,7 +165,7 @@ export default class Bungo {
     // the returned token.
     //
     const now = Date.now();
-    const diff = Math.ceil((now - token.epoch) / 1000) + this.config.buffer;
+    const diff = Math.ceil((now - token.epoch) / 1000) + (this.config.buffer / 2);
     const canbeused = token.expires < diff;
 
     debug('token expires %j/%js, expired: ', diff, token.expires, canbeused);
