@@ -1,5 +1,9 @@
 # CHANGELOG
 
+### 0.0.6
+
+- Added error callback for when user denies/declines the oauth.
+
 ### 0.0.5
 
 - Send only the token's value to the Bungie servers instead of the full refresh

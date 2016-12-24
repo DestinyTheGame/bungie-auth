@@ -95,6 +95,11 @@ export default class Bungo {
 
       const target = new URL(url, true);
 
+      if (!target.query.code) {
+        debug('the user as declined the oauth access, no code was received from bungie');
+        return fn(new Error('User as declined the oAuth request'));
+      }
+
       this.send('GetAccessTokensFromCode', {
         code: target.query.code
       }, this.capture(fn));
@@ -163,7 +168,7 @@ export default class Bungo {
     const diff = Math.ceil((now - token.epoch) / 1000) + this.config.buffer;
     const canbeused = token.expires < diff;
 
-    debug('token diff %n, expired: ', diff, canbeused)
+    debug('token diff %j, expired: ', diff, canbeused)
     return canbeused;
   }
 
