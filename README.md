@@ -16,6 +16,7 @@ oAuth 2.0 based authentication process.
     - [open](#open)
     - [url](#url)
     - [secure](#secure)
+    - [alive](#alive)
     - [expired](#expired)
     - [send](#send)
 - [pre-build](#pre-build)
@@ -78,6 +79,7 @@ The created `bungie` instance will have the following methods available.
 - [capture](#capture)
 - [open](#open)
 - [url](#url)
+- [alive](#alive)
 - [expired](#expired)
 - [secure](#secure)
 - [send](#send)
@@ -266,6 +268,22 @@ The method will return a boolean indicating if the URL is secure.
 ```js
 bungie.state = 'foo';
 bungie.secure('http//example.com/oauth/redirect?state=foo&code=bar'); // true
+```
+
+#### alive
+
+**private api**
+
+Check how long a given token has been alive. Returns time in seconds so it can
+be matched against the `token.expires` property.
+
+The method accepts a single argument:
+
+- `token` The `accessToken` or `refreshToken` object that was returned from the
+  [payload](#payload) method.
+
+```js
+bungie.alive(bungie.accessToken) // 189
 ```
 
 #### expired

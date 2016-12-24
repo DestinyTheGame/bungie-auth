@@ -151,7 +151,7 @@ export default class Bungo {
    *
    * @param {Object} token Token object received from Bungie.net
    * @returns {Boolean}
-   * @private
+   * @public
    */
   expired(token) {
     if (!token || typeof token !== 'object' || !token.value || !token.epoch || !token.expires) {
@@ -164,12 +164,23 @@ export default class Bungo {
     // of buffering so people actually have some time to do an API request with
     // the returned token.
     //
-    const now = Date.now();
-    const diff = Math.ceil((now - token.epoch) / 1000) + (this.config.buffer / 2);
+    const diff = this.alive(token) + (this.config.buffer / 2);
     const canbeused = token.expires < diff;
 
-    debug('token expires %j/%js, expired: ', diff, token.expires, canbeused);
+    debug('token expires %j/%j seconds, expired: ', diff, token.expires, canbeused);
     return canbeused;
+  }
+
+  /**
+   * Calculate the time in seconds that the token has been alive.
+   *
+   * @returns {Number} time in seconds the token has been alive
+   * @public
+   */
+  alive(token) {
+    const now = Date.now();
+
+    return Math.ceil((now - token.epoch) / 1000);
   }
 
   /**
@@ -294,10 +305,21 @@ export default class Bungo {
           this.config.fresh(err, payload);
         }
 
+        let remaining = this.accessToken.expires - this.alive(this.accessToken);
+
+        //
+        // Remove the time from our buffer so we have spare time to refresh the
+        // token without disrupting the application. But we need to make sure
+        // that we still keep a positive integer when setting our timeout so
+        // default to 0.
+        //
+        remaining = remaining - this.config.buffer;
+        if (remaining < 0) remaining = 0;
+
         this.timers.setTimeout('refresh', () => {
           debug('our refreshToken is about to expire, initating auto-refresh');
           this.refresh(this.config.fresh);
-        }, (this.accessToken.expires - this.config.buffer) + ' seconds');
+        }, remaining + ' seconds');
       }
 
       fn(err, payload);
