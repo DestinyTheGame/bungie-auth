@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### 0.0.8
+
+- The auto refresh was not set correctly because the different was calculated
+  incorrectly. We now re-use the logic from our token expiree.
+- Reduce the buffer that is used in the `expires` method to give our refresh
+  functionality more time.
+
 ### 0.0.7
 
 - Clean up the debug information output with more information about the expiree.
