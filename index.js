@@ -31,6 +31,10 @@ export default class Bungo {
     this.timers = new TickTock(this);
     this.config = opts;
     this.state = null;
+
+    if (this.accessToken && this.refreshToken) {
+      this.setTimeout();
+    }
   }
 
   /**
@@ -167,7 +171,7 @@ export default class Bungo {
     const diff = this.alive(token) + (this.config.buffer / 2);
     const canbeused = token.expires < diff;
 
-    debug('token expires %j/%j seconds, expired: ', diff, token.expires, canbeused);
+    debug('token expires %j/%j seconds, expired:', diff, token.expires, canbeused);
     return canbeused;
   }
 
@@ -243,6 +247,37 @@ export default class Bungo {
   }
 
   /**
+   * Try to keep the internally cached accessToken as fresh as possible so
+   * our `.token` method is as fast as it can be. We want to make sure that
+   * we give our API some extra time to do the lookup so we'll subtract 60
+   * seconds from the expiree.
+   *
+   * @private
+   */
+  setTimeout() {
+    if (!this.config.fresh) return;
+    this.timers.clear('refresh');
+
+    let remaining = this.accessToken.expires - this.alive(this.accessToken);
+
+    //
+    // Remove the time from our buffer so we have spare time to refresh the
+    // token without disrupting the application. But we need to make sure
+    // that we still keep a positive integer when setting our timeout so
+    // default to 0.
+    //
+    remaining = remaining - this.config.buffer;
+    if (remaining < 0) remaining = 0;
+
+    debug('updating setTimeout for refreshToken in %s seconds', remaining);
+
+    this.timers.setTimeout('refresh', () => {
+      debug('our refreshToken is about to expire, initating auto-refresh');
+      this.refresh(this.config.fresh);
+    }, remaining + ' seconds');
+  }
+
+  /**
    * Capture the response from the Bungie servers so we can apply some
    * additional processing.
    *
@@ -286,42 +321,17 @@ export default class Bungo {
       const payload = this.payload();
 
       //
-      // Try to keep the internally cached accessToken as fresh as possible so
-      // our `.token` method is as fast as it can be. We want to make sure that
-      // we give our API some extra time to do the lookup so we'll subtract 60
-      // seconds from the expiree.
+      // Check if we previously already had data or if this is actually the
+      // first time we received data because in that case we also want to
+      // trigger the fresh function so it can be used as storage callback for
+      // applications
       //
-      if (this.config.fresh) {
-        this.timers.clear('refresh');
-
-        //
-        // Check if we previously already had data or if this is actually the
-        // first time we received data because in that case we also want to
-        // trigger the fresh function so it can be used as storage callback for
-        // applications
-        //
-        if (!refreshToken) {
-          debug('first time calling refresh as we didnt have a token before')
-          this.config.fresh(err, payload);
-        }
-
-        let remaining = this.accessToken.expires - this.alive(this.accessToken);
-
-        //
-        // Remove the time from our buffer so we have spare time to refresh the
-        // token without disrupting the application. But we need to make sure
-        // that we still keep a positive integer when setting our timeout so
-        // default to 0.
-        //
-        remaining = remaining - this.config.buffer;
-        if (remaining < 0) remaining = 0;
-
-        this.timers.setTimeout('refresh', () => {
-          debug('our refreshToken is about to expire, initating auto-refresh');
-          this.refresh(this.config.fresh);
-        }, remaining + ' seconds');
+      if (this.config.fresh && !refreshToken) {
+        debug('first time calling refresh as we didnt have a token before');
+        this.config.fresh(err, payload);
       }
 
+      this.setTimeout();
       fn(err, payload);
     };
   }

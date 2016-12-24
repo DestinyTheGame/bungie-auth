@@ -12,13 +12,14 @@ oAuth 2.0 based authentication process.
     - [request](#request)
     - [refresh](#refresh)
     - [payload](#payload)
+    - [alive](#alive)
+    - [expired](#expired)
     - [capture](#capture)
     - [open](#open)
     - [url](#url)
     - [secure](#secure)
-    - [alive](#alive)
-    - [expired](#expired)
     - [send](#send)
+    - [setTimeout](#settimeout)
 - [pre-build](#pre-build)
   - [electron](#electron)
 - [license](#license)
@@ -76,13 +77,14 @@ The created `bungie` instance will have the following methods available.
 - [request](#request)
 - [refresh](#refresh)
 - [payload](#payload)
+- [alive](#alive)
+- [expired](#expired)
 - [capture](#capture)
 - [open](#open)
 - [url](#url)
-- [alive](#alive)
-- [expired](#expired)
 - [secure](#secure)
 - [send](#send)
+- [setTimeout](#settimeout)
 
 Once you've received the `accessToken` from one of our API methods you can use
 it's `value` to create the `Authorization` header that might be needed for the
@@ -189,6 +191,42 @@ seconds. We add our own `epoch` property to each object. This is the result of
 `Date.now()` when we first received the information from the Bungie servers.
 This allows you to determine if the token is still valid or if it's expired.
 
+#### alive
+
+Check how long a given token has been alive. Returns time in seconds so it can
+be matched against the `token.expires` property.
+
+The method accepts a single argument:
+
+- `token` The `accessToken` or `refreshToken` object that was returned from the
+  [payload](#payload) method.
+
+```js
+bungie.alive(bungie.accessToken) // 189
+```
+
+#### expired
+
+Check if a token is expired. It does this by checking the amount of seconds that
+have been passed since the token was received based on the `epoch` value that we
+added to the object. It automatically adds `config.buffer` in seconds to the
+time passed so we will have some spare time to request a new access token and
+prevent that API calls will use the token RIGHT when it expired. This gives you
+some peace of mind that the token you receive is **alway** valid for the amount
+of time was configured with the `buffer` option.
+
+The method accepts a single argument:
+
+- `token` The `accessToken` or `refreshToken` object that was returned from the
+  [payload](#payload) method.
+
+The method will return a boolean indicating if the token is still valid or needs
+to be re-requested.
+
+```js
+bungie.expired(bungie.accessToken) // false
+```
+
 #### capture
 
 **private api**
@@ -270,46 +308,6 @@ bungie.state = 'foo';
 bungie.secure('http//example.com/oauth/redirect?state=foo&code=bar'); // true
 ```
 
-#### alive
-
-**private api**
-
-Check how long a given token has been alive. Returns time in seconds so it can
-be matched against the `token.expires` property.
-
-The method accepts a single argument:
-
-- `token` The `accessToken` or `refreshToken` object that was returned from the
-  [payload](#payload) method.
-
-```js
-bungie.alive(bungie.accessToken) // 189
-```
-
-#### expired
-
-**private api**
-
-Check if a token is expired. It does this by checking the amount of seconds that
-have been passed since the token was received based on the `epoch` value that we
-added to the object. It automatically adds `config.buffer` in seconds to the
-time passed so we will have some spare time to request a new access token and
-prevent that API calls will use the token RIGHT when it expired. This gives you
-some peace of mind that the token you receive is **alway** valid for the amount
-of time was configured with the `buffer` option.
-
-The method accepts a single argument:
-
-- `token` The `accessToken` or `refreshToken` object that was returned from the
-  [payload](#payload) method.
-
-The method will return a boolean indicating if the token is still valid or needs
-to be re-requested.
-
-```js
-bungie.expired(bungie.accessToken) // false
-```
-
 #### send
 
 **private api**
@@ -331,6 +329,19 @@ bungie.send('GetAccessTokenFromRefreshToken', {
 }, function (err, data) {
 
 });
+```
+
+#### setTimeout
+
+**private api**
+
+Start the internal setTimeout so we can automatically refresh the cached
+`accessToken` using the `refreshToken` so our internally cached token is alway
+fresh and elimination possibility to provide an token that might expire in a
+second or to accidentally send multiple refresh requests to the bungie API.
+
+```js
+bungie.setTimeout();
 ```
 
 ## Pre-build
