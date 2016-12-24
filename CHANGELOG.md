@@ -1,5 +1,12 @@
 # CHANGELOG
 
+### 0.0.5
+
+- Send only the token's value to the Bungie servers instead of the full refresh
+  object.
+- Added `diagnostics` integration so we can see what is going on with the auth
+  flow using `DEBUG=bungie-auth*` env variables.
+
 ### 0.0.4
 
 - Call the `fresh` option also when we first receive our tokens so we can

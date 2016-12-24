@@ -1,6 +1,6 @@
 {
   "name": "bungie-auth",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Authentication library for Bungie.net",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "dependencies": {
     "babel-preset-es2015": "6.18.x",
     "babel-preset-react": "6.16.x",
-    "diagnostics": "1.1.0",
+    "diagnostics": "1.1.x",
     "failure": "1.1.x",
     "one-time": "0.0.x",
     "request": "2.79.x",
