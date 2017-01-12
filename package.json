@@ -32,7 +32,7 @@
     "failure": "1.1.x",
     "one-time": "0.0.x",
     "request": "2.79.x",
-    "tick-tock": "1.0.x",
+    "tick-tock": "~1.0.0",
     "url-parse": "1.1.x",
     "uuid": "3.0.x"
   },
