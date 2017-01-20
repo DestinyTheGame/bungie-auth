@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "assume": "1.4.x",
-    "babel-register": "6.18.x",
+    "babel-register": "~6.22.0",
     "mocha": "3.2.x",
     "nock": "9.0.x"
   },
