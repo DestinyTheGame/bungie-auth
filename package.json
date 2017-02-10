@@ -40,7 +40,7 @@
     "assume": "1.4.x",
     "babel-register": "6.18.x",
     "mocha": "3.2.x",
-    "nock": "9.0.x"
+    "nock": "~9.0.5"
   },
   "babel-ignore": false,
   "babel": {
