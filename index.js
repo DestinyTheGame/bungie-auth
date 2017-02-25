@@ -298,6 +298,17 @@ export default class Bungo {
       if (!('Response' in body) || 'Success' !== body.ErrorStatus) {
         const message = body.Message || 'Invalid data received from Bungie.net';
 
+        //
+        // The internal authorizationCode is invalid, we should ask the user to
+        // login again.
+        //
+        if (body.ErrorStatus === 'AuthorizationCodeInvalid') {
+          this.refreshToken = null;
+          this.accessToken = null;
+
+          return this.request(fn);
+        }
+
         debug('Invalid response received from Bungie servers: %s', message);
         return fn(failure(message, { status: body.ErrorStatus }));
       }
