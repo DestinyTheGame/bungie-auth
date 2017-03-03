@@ -212,6 +212,15 @@ export default class Bungo {
     }, (err, res, body) => {
       if (err) return fn(err);
 
+      //
+      // Handle invalid responses because the site is down.
+      //
+      if (res.statusCode !== 200 || typeof body !== 'object') {
+        return fn(failure('Bungie API returned an error, try again later.'), {
+          statusCode: res.statusCode
+        });
+      }
+
       fn(undefined, body);
     });
   }
