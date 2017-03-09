@@ -33,6 +33,7 @@ export default class Bungo {
     this.state = null;
 
     if (this.accessToken && this.refreshToken) {
+      debug('had a pre-existing access and refresh token. Starting timeout');
       this.setTimeout();
     }
   }
@@ -85,7 +86,10 @@ export default class Bungo {
    */
   request(fn) {
     this.open((err, url) => {
-      if (err) return fn(err);
+      if (err) {
+        debug('failed to open the authorization window');
+        return fn(err);
+      }
 
       //
       // Validate that our `state` value is exactly the same as the one supplied
@@ -210,12 +214,17 @@ export default class Bungo {
         'Accept': 'application/json',
       }
     }, (err, res, body) => {
-      if (err) return fn(err);
+      if (err) {
+        debug('received an error while making an API request', err);
+        return fn(err);
+      }
 
       //
       // Handle invalid responses because the site is down.
       //
       if (res.statusCode !== 200 || typeof body !== 'object') {
+        debug('invalid response received from bungie server', res.statusCode, body);
+
         return fn(failure('Bungie API returned an error, try again later.'), {
           statusCode: res.statusCode
         });
@@ -315,6 +324,7 @@ export default class Bungo {
           this.refreshToken = null;
           this.accessToken = null;
 
+          debug('our authorization code is invalid, whipe and re-authenticate');
           return this.request(fn);
         }
 
