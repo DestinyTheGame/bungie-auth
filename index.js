@@ -27,6 +27,7 @@ export default class Bungo {
     //
     this.refreshToken = opts.refreshToken || null;
     this.accessToken = opts.accessToken || null;
+    this.redirectURL = opts.redirectURL;
 
     this.timers = new TickTock(this);
     this.config = opts;
@@ -85,21 +86,13 @@ export default class Bungo {
    * @public
    */
   request(fn) {
-    this.open((err, url) => {
+    this.open(this.redirectURL, (err, url) => {
       if (err) {
         debug('failed to open the authorization window');
         return fn(err);
       }
 
-      //
-      // Validate that our `state` value is exactly the same as the one supplied
-      // in the URL. This is to validate that the response was not altered by a
-      // man in the middle.
-      //
-      if (!this.secure(url)) {
-        debug('the given url is not secure, possible security leak detected: %s', url);
-        return fn(new Error('Possible security attack detected'));
-      }
+      debug('processing redirection URL', url);
 
       const target = new URL(url, true);
 

@@ -2,7 +2,6 @@ import { BrowserWindow } from 'electron';
 import diagnostics from 'diagnostics';
 import failure from 'failure';
 import once from 'one-time';
-import URL from 'url-parse';
 import Bungo from '../';
 
 //
@@ -27,10 +26,11 @@ export default class Electron extends Bungo {
   /**
    * Open a new browser window for the oAuth authorization flow.
    *
+   * @param {String} redirectURL Redirect URL.
    * @param {Function} fn Completion callback.
    * @private
    */
-  open(fn) {
+  open(redirectURL, fn) {
     if (this.active) {
       debug('we already have an oauth window open, raising error');
       return fn(failure('Already have an oAuth window open.'));
@@ -77,7 +77,6 @@ export default class Electron extends Bungo {
     browser.show();
 
     browser.webContents.on('did-get-redirect-request', (event, prev, next) => {
-      const target = new URL(next);
       debug('received redirect request to %s', next);
 
       //
@@ -87,7 +86,7 @@ export default class Electron extends Bungo {
       // like an oAuth proxy so they will redirect a couple of times during the
       // oAuth flow.
       //
-      if (target.hostname === 'www.bungie.net') return;
+      if (next.indexOf(redirectURL) !== 0) return;
 
       close(undefined, next);
     });

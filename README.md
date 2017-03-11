@@ -41,6 +41,7 @@ ES5 compatible version.
 
 The following configuration values are **required**:
 
+- `redirectURL` The URL that Bungie redirects to.
 - `url` The unique `Authorization URL` that Bungie created for your application.
 - `key` The API for your `Authorization URL`.
 
