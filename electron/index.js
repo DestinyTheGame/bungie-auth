@@ -68,6 +68,27 @@ export default class Electron extends Bungo {
       fn(err, url);
     });
 
+    /**
+     * Handle redirection and URL changes.
+     *
+     * @param {String} url New URL.
+     * @private
+     */
+    const redirect = (url) => {
+      debug('received redirect request to %s', url);
+
+      //
+      // This part of Bungie's o-auth flow is weird as fuck, normally you would
+      // just login with your credentials and be done, but they need to get your
+      // playstation details so they are not really an oAuth provider but more
+      // like an oAuth proxy so they will redirect a couple of times during the
+      // oAuth flow.
+      //
+      if (url.indexOf(redirectURL) !== 0) return;
+
+      close(undefined, url);
+    };
+
     browser.on('closed', () => {
       debug('user closed browser window');
       close(failure('User closed the oAuth window'));
@@ -77,18 +98,13 @@ export default class Electron extends Bungo {
     browser.show();
 
     browser.webContents.on('did-get-redirect-request', (event, prev, next) => {
-      debug('received redirect request to %s', next);
+      debug('redirect request from %s to %s', prev, next);
+      redirect(next);
+    });
 
-      //
-      // This part of Bungie's o-auth flow is weird as fuck, normally you would
-      // just login with your credentials and be done, but they need to get your
-      // playstation details so they are not really an oAuth provider but more
-      // like an oAuth proxy so they will redirect a couple of times during the
-      // oAuth flow.
-      //
-      if (next.indexOf(redirectURL) !== 0) return;
-
-      close(undefined, next);
+    browser.webContents.on('will-navigate', (event, url) => {
+      debug('will navigate to %s', url);
+      redirect(url);
     });
   }
 }
